@@ -1,0 +1,54 @@
+name: Build Docker images for Python
+
+on:
+  push:
+  schedule:
+    - cron: "0 4 * * SAT"
+  workflow_dispatch:
+
+jobs:
+  build-python:
+    name: build python
+    runs-on: [self-hosted, heavy-build]
+    needs: []
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - IMAGE_NAME: python
+            IMAGE_TAG: 3.12-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build
+        uses: kubasejdak-org/docker-build-base-action@main
+        with:
+          image: ${{ matrix.IMAGE_NAME }}
+          tag: ${{ matrix.IMAGE_TAG }}
+          workdir: ${{ matrix.IMAGE_NAME }}/${{ matrix.IMAGE_TAG }}
+
+  check-all:
+    runs-on: [self-hosted, heavy-build]
+    needs:
+      - build-python
+    steps:
+      - run: echo "Success"
+
+  deploy:
+    runs-on: [self-hosted, heavy-build]
+    if: github.ref_name == 'main'
+    needs:
+      - check-all
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - IMAGE_NAME: python
+            IMAGE_TAG: 3.12-24.04
+    steps:
+      - name: docker push
+        uses: kubasejdak-org/docker-push-action@main
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          image: ${{ matrix.IMAGE_NAME }}
+          tag: ${{ matrix.IMAGE_TAG }}
