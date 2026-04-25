@@ -17,8 +17,10 @@ jobs:
         include:
           - IMAGE_NAME: python
             IMAGE_TAG: 3.12-24.04
+          - IMAGE_NAME: python
+            IMAGE_TAG: 3.14-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: docker build
         uses: kubasejdak-org/docker-build-base-action@main
         with:
@@ -44,6 +46,8 @@ jobs:
         include:
           - IMAGE_NAME: python
             IMAGE_TAG: 3.12-24.04
+          - IMAGE_NAME: python
+            IMAGE_TAG: 3.14-26.04
     steps:
       - name: docker push
         uses: kubasejdak-org/docker-push-action@main
