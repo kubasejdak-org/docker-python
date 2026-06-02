@@ -30,16 +30,16 @@ jobs:
 
   check-all:
     runs-on: [self-hosted, heavy-build]
-    needs:
-      - build-python
+    if: always()
+    needs: build-python
     steps:
-      - run: echo "Success"
+      - name: Check all jobs
+        run: '! echo ''${{ toJSON(needs.*.result) }}'' | grep -qE ''"(failure|cancelled|skipped)"'''
 
   deploy:
     runs-on: [self-hosted, heavy-build]
     if: github.ref_name == 'main'
-    needs:
-      - check-all
+    needs: check-all
     strategy:
       fail-fast: false
       matrix:
